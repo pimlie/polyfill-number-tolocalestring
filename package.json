@@ -1,6 +1,6 @@
 {
   "name": "polyfill-number-tolocalestring",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Polyfill Number.prototype.toLocaleString() using globalize",
   "main": "dist/polyfill-number-tolocalestring.cjs.js",
   "web": "dist/polyfill-number-tolocalestring.min.js",
