@@ -1,35 +1,51 @@
 {
-  "name": "number-tolocalestring-polyfill",
-  "version": "1.0.1",
-  "description": "Polyfill Number.prototype.toLocaleString() with globalize",
+  "name": "polyfill-number-tolocalestring",
+  "version": "2.0.0",
+  "description": "Polyfill Number.prototype.toLocaleString() using globalize",
   "main": "lib/index.js",
+  "web": "lib/index.js",
+  "module": "src/index.js",
+  "jsnext:main": "src/index.js",
   "dependencies": {
-    "cldr-data": "^30.0.1",
-    "globalize": "^1.1.1"
+    "cldr-data": "^34.0.0",
+    "globalize": "^1.4.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.6.5",
-    "babel-core": "^6.7.4",
-    "babel-plugin-syntax-object-rest-spread": "^6.5.0",
-    "babel-plugin-transform-object-rest-spread": "^6.6.5",
-    "babel-preset-airbnb": "^1.1.1",
-    "babelify": "^7.3.0",
-    "browserify": "^13.1.1",
-    "eslint": "^3.9.1",
-    "eslint-config-airbnb": "^12.0.0",
-    "eslint-plugin-import": "^1.16.0",
-    "eslint-plugin-jsx-a11y": "^2.2.3",
-    "eslint-plugin-react": "^6.5.0",
-    "jest": "^16.0.2"
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-export-default-from": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "@nuxtjs/eslint-config": "^0.0.1",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^23.6.0",
+    "babel-plugin-dynamic-import-node": "^2.2.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3",
+    "eslint": "^5.11.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^22.1.2",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^5.1.0",
+    "full-icu": "^1.2.1",
+    "jest": "^23.6.0"
   },
+  "files": [
+    "lib",
+    "src"
+  ],
   "scripts": {
     "build": "rm -rf lib && mkdir lib && browserify ./src/index.js -o ./lib/index.js -t [ babelify ]",
+    "lint": "eslint src tests",
     "prepublish": "npm run build",
-    "test": "jest"
+    "test": "NODE_ICU_DATA=./node_modules/full-icu jest tests"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chengyin/number-tolocalestring-polyfill.git"
+    "url": "git+https://github.com/chengyin/polyfill-number-tolocalestring.git"
   },
   "keywords": [
     "tolocalestring",
@@ -39,10 +55,12 @@
     "i10n",
     "localization"
   ],
-  "author": "Chengyin Liu <chengyin.liu@airbnb.com>",
+  "author": "pimlie <pimlie@hotmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chengyin/number-tolocalestring-polyfill/issues"
+    "url": "https://github.com/pimlie/polyfill-number-tolocalestring/issues"
   },
-  "homepage": "https://github.com/chengyin/number-tolocalestring-polyfill#readme"
+  "homepage": "https://github.com/pimlie/polyfill-number-tolocalestring#readme",
+  "cldr-data-coverage": "full",
+  "cldr-data-urls-filter": "(core|numbers-full)"
 }

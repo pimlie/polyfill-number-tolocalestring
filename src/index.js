@@ -1,76 +1,142 @@
-/* eslint global-require: off, no-extend-native: off, new-cap: off */
-/* global Number: true, Intl, require */
 // Feature detection from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString
-
-function toLocaleStringSupportsLocales() {
-  const number = 0;
+const toLocaleStringSupportsLocales = () => {
+  const number = 0
 
   try {
-    number.toLocaleString('i');
+    number.toLocaleString('i')
   } catch (e) {
-    return e.name === 'RangeError';
+    return e.name === 'RangeError'
   }
 
-  return false;
+  return false
 }
 
-function toLocaleStringSupportsOptions() {
-  return !!(typeof Intl === 'object' && Intl && typeof Intl.NumberFormat === 'function');
+const toLocaleStringSupportsOptions = () => !!(typeof Intl === 'object' && Intl && typeof Intl.NumberFormat === 'function')
+
+const shouldPolyfill = (force = false) => {
+  return !(!force && toLocaleStringSupportsLocales() && toLocaleStringSupportsOptions())
 }
 
-module.exports = function polyfill(force = false) {
-  if (!force && toLocaleStringSupportsLocales() && toLocaleStringSupportsOptions()) {
-    return;
-  }
+const setPolyfill = (Globalize, cldrData) => {
+  const original = Number.prototype.toLocaleString
+  const loadedCldrKeys = {}
+  const loadCldrData = function loadCldrData(keys) {
+    let keysLoaded = 0
 
-  const localeLoaded = {};
+    keys.forEach((key) => {
+      if (loadedCldrKeys[key]) {
+        keysLoaded++
+      }
+    })
 
-  const Globalize = require('globalize');
-  const cldrData = require('cldr-data');
-
-  Globalize.load(cldrData.entireSupplemental());
-
-  const original = Number.prototype.toLocaleString;
-
-  Number.prototype.toLocaleString = function toLocaleString(lcl, opts) {
-    const options = opts || {};
-
-    // No currency support yet
-    if (options.style === 'currency') {
-      return original.call(this, lcl, options);
+    if (keys.length === keysLoaded) {
+      return true
     }
 
-    const locale = lcl || 'en';
+    try {
+      const allData = []
+      for (const key of keys) {
+        if (!loadedCldrKeys[key]) {
+          const data = cldrData(key)
 
-    if (!localeLoaded[locale]) {
-      let localeData;
-
-      try {
-        localeData = cldrData.entireMainFor(locale);
-      } catch (e) {}
-
-      if (!localeData) {
-        try {
-          const attributes = Globalize(locale).cldr.attributes;
-          const { bundle, maxLanguageId } = attributes;
-          const approximated = bundle || maxLanguageId;
-
-          if (approximated) {
-            localeData = cldrData.entireMainFor(approximated);
+          if (!data) {
+            break
+          } else {
+            allData.push(data)
           }
-        } catch (e) {}
+        }
       }
 
-      if (!localeData) {
-        return this.toString();
+      if (allData.length) {
+        Globalize.load(...allData)
       }
 
-      Globalize.load(localeData);
-      localeLoaded[locale] = true;
+      return keys.length === (keysLoaded + allData.length)
+    } catch (e) {
+      return false
     }
+  }
 
-    const formatter = Globalize(locale).numberFormatter(options);
+  if (loadCldrData([
+    'supplemental/likelySubtags',
+    'supplemental/numberingSystems'
+  ])) {
+    const loadedLocales = {}
 
-    return formatter(this.valueOf());
-  };
-};
+    Number.prototype.toLocaleString = function toLocaleString(lcl, opts) {
+      const locale = lcl || 'en'
+      const options = Object.assign({ style: 'decimal' }, opts)
+
+      const showCurrency = options.style === 'currency' && loadCldrData([
+        'supplemental/currencyData',
+        'supplemental/plurals'
+      ])
+
+      if (!loadedLocales[locale]) {
+        const loadLocales = [locale]
+        for (const loadLocale of loadLocales) {
+          const keys = [`main/${loadLocale}/numbers`]
+          if (showCurrency) {
+            keys.push(`main/${loadLocale}/currencies`)
+          }
+
+          if (loadCldrData(keys)) {
+            loadedLocales[locale] = true
+            break
+          } else if (loadLocales.length === 1) {
+            const globalize = Globalize(locale)
+            Array.prototype.push.apply(loadLocales, [
+              globalize.cldr.attributes.maxLanguageId,
+              globalize.cldr.attributes.minLanguageId,
+              globalize.cldr.attributes.bundle
+            ].filter(v => !!v && !loadLocales.includes(v)))
+          }
+        }
+      }
+
+      if (!loadedLocales[locale]) {
+        return this.toString()
+      }
+
+      let formatter
+      if (showCurrency) {
+        const currencyOptions = Object.assign(options, {
+          style: options.currencyDisplay
+        })
+        formatter = Globalize(locale).currencyFormatter(options.currency, currencyOptions)
+      } else {
+        formatter = Globalize(locale).numberFormatter(options)
+      }
+
+      return formatter(this.valueOf())
+    }
+  }
+
+  return () => {
+    Number.prototype.toLocaleString = original
+  }
+}
+
+export const polyfillSync = function polyfillSync(force = false) {
+  if (!shouldPolyfill(force)) {
+    return false
+  }
+
+  const Globalize = require('globalize')
+  const cldrData = require('cldr-data')
+
+  return setPolyfill(Globalize, cldrData)
+}
+
+export const polyfill = async function polyfill(force = false) {
+  if (!shouldPolyfill(force)) {
+    return false
+  }
+
+  const Globalize = (await import('globalize')).default
+  const cldrData = (await import('cldr-data')).default
+
+  return setPolyfill(Globalize, cldrData)
+}
+
+export default polyfill
