@@ -1,7 +1,6 @@
 {
   "presets": ["@babel/env"],
   "plugins": [
-    "dynamic-import-node",
-    "@babel/plugin-proposal-export-default-from"
+    "dynamic-import-node"
   ]
 }

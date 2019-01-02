@@ -1,3 +1,5 @@
+import '@babel/polyfill'
+
 // Feature detection from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString
 const toLocaleStringSupportsLocales = () => {
   const number = 0

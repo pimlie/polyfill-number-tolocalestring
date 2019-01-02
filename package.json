@@ -1,27 +1,26 @@
 {
   "name": "polyfill-number-tolocalestring",
-  "version": "2.0.0",
+  "version": "1.0.1",
   "description": "Polyfill Number.prototype.toLocaleString() using globalize",
-  "main": "lib/index.js",
-  "web": "lib/index.js",
+  "main": "dist/polyfill-number-tolocalestring.cjs.js",
+  "web": "dist/polyfill-number-tolocalestring.min.js",
   "module": "src/index.js",
   "jsnext:main": "src/index.js",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "cldr-data": "^34.0.0",
     "globalize": "^1.4.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
-    "@babel/plugin-proposal-export-default-from": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
     "@nuxtjs/eslint-config": "^0.0.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
     "babel-plugin-dynamic-import-node": "^2.2.0",
-    "babelify": "^10.0.0",
-    "browserify": "^16.2.3",
+    "bili": "^3.4.2",
     "eslint": "^5.11.1",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
@@ -31,21 +30,23 @@
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.1.0",
     "full-icu": "^1.2.1",
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "standard-version": "^4.4.0"
   },
   "files": [
-    "lib",
+    "dist",
     "src"
   ],
   "scripts": {
-    "build": "rm -rf lib && mkdir lib && browserify ./src/index.js -o ./lib/index.js -t [ babelify ]",
+    "build": "rm -rf dist && bili --format cjs,umd,umd-min src/index.js",
     "lint": "eslint src tests",
     "prepublish": "npm run build",
-    "test": "NODE_ICU_DATA=./node_modules/full-icu jest tests"
+    "test": "NODE_ICU_DATA=./node_modules/full-icu jest tests",
+    "release": "npm run build && npm run test && standard-version"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chengyin/polyfill-number-tolocalestring.git"
+    "url": "git+https://github.com/pimlie/polyfill-number-tolocalestring.git"
   },
   "keywords": [
     "tolocalestring",

@@ -1,5 +1,9 @@
+import locales from './locales'
 export { polyfill, polyfillSync } from '../../src'
-export locales from './locales'
+
+export {
+  locales
+}
 
 export const original = Number.prototype.toLocaleString
 
